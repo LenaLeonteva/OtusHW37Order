@@ -1,0 +1,3 @@
+kubectl apply -f conf_map.yaml -f dp_d.yaml -f dp_o.yaml -f dp_p.yaml -f dp_s.yaml
+kubectl apply -f svc_d.yaml -f svc_o.yaml -f svc_p.yaml -f svc_s.yaml
+kubectl apply -f ing_d.yaml -f ing_o.yaml -f ing_p.yaml -f ing_s.yaml

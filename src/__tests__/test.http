@@ -1,0 +1,15 @@
+#@host=http://arch.homework
+@host=http://127.0.0.1:3000
+
+### register
+POST {{host}}/order/create
+Content-Type: application/json
+
+{
+  "order_id": "{{$guid}}",
+  "user_id": 1,
+  "price": 10,
+  "product_id": 2,
+  "number": 1,
+  "date": "24.01.2024"
+}

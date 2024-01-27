@@ -1,0 +1,118 @@
+openapi: 3.0.0
+info:
+  description: |
+    This is simple client API
+  version: "1.0.0"
+  title: Orders Service
+  contact:
+    email: kisuni@gmail.com
+servers:
+  - description: Example Server
+    url: http://example.domain/api/v1/
+  - description: SwaggerHub API Auto Mocking
+    url: https://virtserver.swaggerhub.com/otus55/users/1.0.0
+tags:
+  - name: user
+    description: Operations about user
+paths:
+  /order/create:
+    post:
+      tags:
+        - order
+      summary: Create order
+      operationId: createOrder
+      responses:
+        default:
+          description: successful operation
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Order"
+        description: Created order object
+        required: true
+  /order/{orderId}:
+    parameters:
+      - name: orderId
+        in: path
+        description: ID of order
+        required: true
+        schema:
+          type: string
+    get:
+      tags:
+        - order
+      description: Returns order
+      operationId: find order by id
+      responses:
+        "200":
+          description: order response
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Order"
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+    delete:
+      tags:
+        - order
+      description: deletes a single order based on the ID supplied
+      operationId: deleteOrder
+      responses:
+        "204":
+          description: order deleted
+        default:
+          description: unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Error"
+components:
+  schemas:
+    Order:
+      type: object
+      properties:
+        order_id:
+          type: string
+        user_id:
+          type: number
+          format: int32
+        price:
+          type: number
+          format: float
+          minimum: 0
+        product_id:
+          type: number
+          format: int32
+        number:
+          type: number
+          format: int32
+        date:
+          type: string
+        completed:
+          type: boolean
+    Error:
+      type: object
+      required:
+        - code
+        - message
+      properties:
+        code:
+          type: integer
+          format: int32
+        message:
+          type: string
+  requestBodies:
+    OrderArray:
+      content:
+        application/json:
+          schema:
+            type: array
+            items:
+              $ref: "#/components/schemas/Order"
+      description: List of user object
+      required: true

@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: order
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: order
+  template:
+    metadata:
+      labels:
+        app: order
+    spec:
+      containers:
+        - name: hw32order
+          image: kisuni/hw32order
+          ports:
+            - containerPort: 8000
+          env:
+            - name: PAYMENT_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: order-configmap
+                  key: PAYMENT_HOST
+            - name: STOCK_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: order-configmap
+                  key: STOCK_HOST
+            - name: DELIVERY_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: order-configmap
+                  key: DELIVERY_HOST
