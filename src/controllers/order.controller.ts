@@ -4,9 +4,8 @@ import {Response, RestBindings, api, operation, param, requestBody} from '@loopb
 import {CONFIG} from '../config';
 import {SvcConnector} from '../connectors/svc.connector';
 import {BalanceReserve} from '../models/balance-reserve.model';
-import {CourierReserv} from '../models/courier-reserv.model';
+import {Message} from '../models/message.model';
 import {Order} from '../models/order.model';
-import {ProductReserv} from '../models/product-reserv.model';
 import {OrderRepository} from '../repositories';
 
 /**
@@ -154,52 +153,63 @@ export class OrderController {
     let payRes = await payment.postReq(payReq);
     console.log(payRes);
 
+    let notify = new SvcConnector(CONFIG.notify.host, 60000, CONFIG.trace);
+    let message = new Message();
+    message.order_id = _requestBody.order_id;
+    message.user_id = _requestBody.user_id;
+
     if (payRes.error) {
       //let payDel = await payment.delReq(payReq);
       console.log("Платеж не прошёл. Заказ отменён.");
+      message.message = "Оплата не прошла. Недостаточно средств на счете"
+      notify.postReq(message)
       return this.response.status(payRes.code ?? 500).send(payRes.message);
     }
 
-    //РЕЗЕРВ ТОВАРА
-    let stock = new SvcConnector(CONFIG.stock.host, 60000, CONFIG.trace);
-    let stockRec = new ProductReserv();
-    stockRec.number = _requestBody.number;
-    stockRec.order_id = _requestBody.order_id;
-    stockRec.product_id = _requestBody.product_id;
+    // //РЕЗЕРВ ТОВАРА
+    // let stock = new SvcConnector(CONFIG.stock.host, 60000, CONFIG.trace);
+    // let stockRec = new ProductReserv();
+    // stockRec.number = _requestBody.number;
+    // stockRec.order_id = _requestBody.order_id;
+    // stockRec.product_id = _requestBody.product_id;
 
-    let stockRes = await stock.postReq(stockRec);
-    console.log(stockRes);
+    // let stockRes = await stock.postReq(stockRec);
+    // console.log(stockRes);
 
-    if (stockRes.error) {
-      let payDel = await payment.delReq(payReq);
-      //let stockDel = await payment.delReq(stockRec);
-      console.log("Delete Payment", payDel);
-      console.log("Не удалось зарезервировать товар на складе. Деньги поступят на счет в течение 15 минут. Заказ отменён.")
-      return this.response.status(stockRes.code ?? 500).send(stockRes.message);
-    }
+    // if (stockRes.error) {
+    //   let payDel = await payment.delReq(payReq);
+    //   //let stockDel = await payment.delReq(stockRec);
+    //   console.log("Delete Payment", payDel);
+    //   console.log("Не удалось зарезервировать товар на складе. Деньги поступят на счет в течение 15 минут. Заказ отменён.")
+    //   return this.response.status(stockRes.code ?? 500).send(stockRes.message);
+    // }
 
-    //РЕЗЕРВ КУРЬЕРА
-    let courier = new SvcConnector(CONFIG.delivery.host, 60000, CONFIG.trace);
-    let courierRec = new CourierReserv();
-    courierRec.date = _requestBody.date;
-    courierRec.order_id = _requestBody.order_id;
-    courierRec.courier_id = _requestBody.product_id;
+    // //РЕЗЕРВ КУРЬЕРА
+    // let courier = new SvcConnector(CONFIG.delivery.host, 60000, CONFIG.trace);
+    // let courierRec = new CourierReserv();
+    // courierRec.date = _requestBody.date;
+    // courierRec.order_id = _requestBody.order_id;
+    // courierRec.courier_id = _requestBody.product_id;
 
-    let courierRes = await courier.postReq(courierRec);
-    console.log(courierRes);
+    // let courierRes = await courier.postReq(courierRec);
+    // console.log(courierRes);
 
-    if (courierRes.error) {
-      let payDel = await payment.delReq(payReq);
-      console.log("Delete Payment", payDel);
-      let stockDel = await stock.delReq(stockRec);
-      console.log("Delete product reserve", stockDel);
-      //let courierDel = await payment.delReq(courierRec);
-      console.log(`Невозможно доставить товар по вашему адресу. Деньги поступят на счет в течение 15 минут. Заказ отменён.`)
-      return this.response.status(courierRes.code ?? 500).send(courierRes.message);
-    }
+    // if (courierRes.error) {
+    //   let payDel = await payment.delReq(payReq);
+    //   console.log("Delete Payment", payDel);
+    //   let stockDel = await stock.delReq(stockRec);
+    //   console.log("Delete product reserve", stockDel);
+    //   //let courierDel = await payment.delReq(courierRec);
+    //   console.log(`Невозможно доставить товар по вашему адресу. Деньги поступят на счет в течение 15 минут. Заказ отменён.`)
+    //   return this.response.status(courierRes.code ?? 500).send(courierRes.message);
+    // }
 
     const newOrder = await this.orderRepo.create(_requestBody);
-    return this.response.status(200).send(newOrder);
+
+    message.message = "Заказ оплачен";
+    notify.postReq(message);
+
+    return newOrder;
   }
   /**
    * Returns order

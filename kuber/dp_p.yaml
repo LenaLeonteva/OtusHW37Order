@@ -15,7 +15,7 @@ spec:
         app: payment
     spec:
       containers:
-        - name: hw32payment
-          image: kisuni/hw32payment
+        - name: hw37payment
+          image: kisuni/hw37payment
           ports:
             - containerPort: 8000

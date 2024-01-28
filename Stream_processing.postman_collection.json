@@ -1,0 +1,421 @@
+{
+	"info": {
+		"_postman_id": "128c8e7c-77c9-40f0-855a-8eedb7ebfba0",
+		"name": "Stream processing",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "30100755"
+	},
+	"item": [
+		{
+			"name": "Создаем пользователя",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"var responseJSON = JSON.parse(responseBody);\r",
+							"pm.collectionVariables.set(\"IDuser\", responseJSON[\"user_id\"]);\r",
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});\r",
+							""
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"username\": \"alice\",\r\n  \"firstName\": \"Alice\",\r\n  \"lastName\": \"Cat\",\r\n  \"email\": \"alice@meow.com\",\r\n  \"phone\": \"+71002003041\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url_u}}/user",
+					"host": [
+						"{{base_url_u}}"
+					],
+					"path": [
+						"user"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Добавляем баланс 1000",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"user_id\": 1,\r\n  \"balance\": 1000\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url_p}}/balance/add",
+					"host": [
+						"{{base_url_p}}"
+					],
+					"path": [
+						"balance",
+						"add"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Создаем заказ - успешно",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Successful POST request\", function () {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([200]);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"order_id\": \"{{good_order}}\",\r\n  \"user_id\": 1,\r\n  \"price\": 10,\r\n  \"product_id\": 1,\r\n  \"number\": 5,\r\n  \"date\": \"24.01.2024\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url_o}}/order/create",
+					"host": [
+						"{{base_url_o}}"
+					],
+					"path": [
+						"order",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Денег осталось 990",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Money number is 990\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.balance).to.eql(990)\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"user_id\": 1\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url_p}}/balance/add",
+					"host": [
+						"{{base_url_p}}"
+					],
+					"path": [
+						"balance",
+						"add"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Проверяем сообщение",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Заказ оплачен\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.message).to.eql(\"Заказ оплачен\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url_n}}/message/{{good_order}}",
+					"host": [
+						"{{base_url_n}}"
+					],
+					"path": [
+						"message",
+						"{{good_order}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Создаем заказ -  не хватило товара",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Не хватило денег\", function () {\r",
+							"    pm.expect(pm.response.code).to.be.oneOf([404, 500, 400]);\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"order_id\": \"{{bad_order}}\",\r\n  \"user_id\": 1,\r\n  \"price\": 10000,\r\n  \"product_id\": 1,\r\n  \"number\": 10,\r\n  \"date\": \"24.01.2024\"\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url_o}}/order/create",
+					"host": [
+						"{{base_url_o}}"
+					],
+					"path": [
+						"order",
+						"create"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Денег осталось 990",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Money number is 990\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.balance).to.eql(990)\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n  \"user_id\": 1\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url_p}}/balance/add",
+					"host": [
+						"{{base_url_p}}"
+					],
+					"path": [
+						"balance",
+						"add"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "Проверяем сообщение",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Оплата не прошла. Недостаточно средств на счете\", function () {\r",
+							"    pm.response.to.have.status(200);\r",
+							"    var jsonData = pm.response.json();\r",
+							"    pm.expect(jsonData.message).to.eql(\"Оплата не прошла. Недостаточно средств на счете\");\r",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url_n}}/message/{{bad_order}}",
+					"host": [
+						"{{base_url_n}}"
+					],
+					"path": [
+						"message",
+						"{{bad_order}}"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://arch.homework",
+			"type": "string"
+		},
+		{
+			"key": "base_url_d",
+			"value": "http://arch.homework",
+			"type": "string"
+		},
+		{
+			"key": "base_url_s",
+			"value": "http://arch.homework",
+			"type": "string"
+		},
+		{
+			"key": "base_url_p",
+			"value": "http://arch.homework",
+			"type": "string"
+		},
+		{
+			"key": "base_url_o",
+			"value": "http://arch.homework",
+			"type": "string"
+		},
+		{
+			"key": "base_url_u",
+			"value": "http://arch.homework"
+		},
+		{
+			"key": "base_url_n",
+			"value": "http://arch.homework"
+		},
+		{
+			"key": "IDuser",
+			"value": ""
+		},
+		{
+			"key": "good_order",
+			"value": "good",
+			"type": "string"
+		},
+		{
+			"key": "bad_order",
+			"value": "bad",
+			"type": "string"
+		}
+	]
+}

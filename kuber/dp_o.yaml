@@ -15,8 +15,8 @@ spec:
         app: order
     spec:
       containers:
-        - name: hw32order
-          image: kisuni/hw32order
+        - name: hw37order
+          image: kisuni/hw37order
           ports:
             - containerPort: 8000
           env:
@@ -35,3 +35,8 @@ spec:
                 configMapKeyRef:
                   name: order-configmap
                   key: DELIVERY_HOST
+            - name: NOTIFY_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: order-configmap
+                  key: NOTIFY_HOST

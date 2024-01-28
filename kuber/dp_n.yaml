@@ -1,21 +1,21 @@
 apiVersion: apps/v1
 kind: Deployment
 metadata:
-  name: delivery
+  name: notify
 spec:
   replicas: 1
   strategy:
     type: Recreate
   selector:
     matchLabels:
-      app: delivery
+      app: notify
   template:
     metadata:
       labels:
-        app: delivery
+        app: notify
     spec:
       containers:
-        - name: hw32delivery
-          image: kisuni/hw32delivery
+        - name: hw37notify
+          image: kisuni/hw37notify
           ports:
             - containerPort: 8000

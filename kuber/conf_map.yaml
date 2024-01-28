@@ -6,3 +6,5 @@ data:
   PAYMENT_HOST: "http://payment-service.default.svc.cluster.local/balance/reserve"
   STOCK_HOST: "http://stock-service.default.svc.cluster.local/products/reserve"
   DELIVERY_HOST: "http://delivery-service.default.svc.cluster.local/courier/reserve"
+  NOTIFY_HOST: "http://notify-service.default.svc.cluster.local/message/send"
+  BALANCE_HOST: "http://payment-service.default.svc.cluster.local/balance/add"

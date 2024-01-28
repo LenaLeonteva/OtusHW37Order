@@ -1,24 +1,24 @@
 apiVersion: networking.k8s.io/v1
 kind: Ingress
 metadata:
-  name: delivery-ingress
+  name: users-ingress
 spec:
   ingressClassName: nginx
   rules:
     - host: arch.homework
       http:
         paths:
-          - path: /courier/add
+          - path: /user
             pathType: Prefix
             backend:
               service:
-                name: delivery-service
+                name: users-service
                 port:
                   number: 80
-          - path: /courier/reserve
+          - path: /ping
             pathType: Prefix
             backend:
               service:
-                name: delivery-service
+                name: users-service
                 port:
                   number: 80

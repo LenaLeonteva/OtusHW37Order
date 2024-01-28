@@ -1,0 +1,27 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: users
+spec:
+  replicas: 1
+  strategy:
+    type: Recreate
+  selector:
+    matchLabels:
+      app: users
+  template:
+    metadata:
+      labels:
+        app: users
+    spec:
+      containers:
+        - name: hw37user
+          image: kisuni/hw37user
+          ports:
+            - containerPort: 8000
+          env:
+            - name: BALANCE_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: order-configmap
+                  key: BALANCE_HOST

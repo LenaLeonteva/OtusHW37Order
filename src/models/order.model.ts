@@ -18,10 +18,10 @@ export class Order extends Entity {
    */
   @property({
     id: true,
-    generated: 'false',
+    generated: false,
     type: 'string'
   })
-  order_id?: string;
+  order_id: string;
 
   /**
    *
