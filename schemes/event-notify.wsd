@@ -1,0 +1,12 @@
+title Stream processing - event-notify
+FrontEnd->User:send user create
+User->Payment:send account create
+Payment-->User:account response
+User-->FrontEnd:user response
+FrontEnd->Order:send order create
+Order->Payment: send payment request
+Payment-->Order: payment response
+Order-->FrontEnd:order response
+Order->MQ: send message
+MQ->Notify: get message
+Notify->Email: send message

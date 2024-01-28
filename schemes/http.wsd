@@ -1,0 +1,11 @@
+title Stream processing - HTTP
+FrontEnd->User:send user create
+User->Payment:send account create
+Payment-->User:account response
+User-->FrontEnd:user response
+FrontEnd->Order:send order create
+Order->Payment: send payment request
+Payment-->Order: payment response
+Order-->FrontEnd:order response
+Order->Notify: send message
+Notify->Email: send message

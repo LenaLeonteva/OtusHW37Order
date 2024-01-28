@@ -1,0 +1,25 @@
+title Stream processing - Event Collaboration
+participant FrontEnd
+participant User
+participant MQ
+participant Order
+
+FrontEnd->MQ: send create user
+MQ-->User: get create user
+User->MQ:send create account
+MQ-->Payment:get create account
+Payment->MQ:send account response
+MQ-->User:get account response
+User->MQ:send user response
+MQ->FrontEnd:get user response
+FrontEnd->MQ: send create order
+MQ-->Order: get create order
+Order->MQ: send payment request
+MQ-->Payment: get payment request
+Payment->MQ: send payment response
+MQ-->Order: get payment response
+Order->MQ: send order response
+MQ-->FrontEnd:get order response
+Order->MQ: send message
+MQ-->Notify: get message
+Notify->Email: send message
