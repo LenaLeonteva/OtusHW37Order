@@ -1,0 +1,51 @@
+openapi: "3.0.2"
+info:
+  title: API Title
+  version: "1.0"
+servers:
+  - url: https://api.server.test/v1
+paths:
+  /message/send:
+    post:
+      operationId: sendMessage
+      responses:
+        "200":
+          description: OK
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/Message"
+        description: Create message
+        required: true
+  /message/{orderId}:
+    parameters:
+      - name: orderId
+        in: path
+        description: ID of order
+        required: true
+        schema:
+          type: string
+    get:
+      operationId: getMessage
+      responses:
+        "200":
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/Message"
+components:
+  schemas:
+    Message:
+      type: object
+      properties:
+        id:
+          type: string
+        order_id:
+          type: string
+        user_id:
+          type: number
+          format: int32
+        message:
+          type: string
