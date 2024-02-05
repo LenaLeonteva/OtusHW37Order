@@ -47,7 +47,9 @@
   "dependencies": {
     "@loopback/boot": "^6.1.3",
     "@loopback/core": "^5.1.3",
+    "@loopback/health": "^0.13.5",
     "@loopback/logging": "^0.11.5",
+    "@loopback/metrics": "^0.13.5",
     "@loopback/repository": "^6.1.4",
     "@loopback/rest": "^13.1.3",
     "@loopback/rest-explorer": "^6.1.3",

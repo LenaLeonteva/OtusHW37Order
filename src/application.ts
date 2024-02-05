@@ -8,6 +8,8 @@ import {RepositoryMixin} from '@loopback/repository';
 import {RestApplication} from '@loopback/rest';
 import path from 'path';
 import {MySequence} from './sequence';
+import {HealthComponent} from '@loopback/health';
+import {MetricsComponent} from '@loopback/metrics';
 
 export {ApplicationConfig};
 
@@ -28,6 +30,8 @@ export class Idempotency extends BootMixin(
       path: '/explorer',
     });
     this.component(RestExplorerComponent);
+    this.component(MetricsComponent);
+    this.component(HealthComponent);
 
     this.projectRoot = __dirname;
     // Customize @loopback/boot Booter Conventions here
