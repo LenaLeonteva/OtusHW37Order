@@ -145,6 +145,8 @@ export class OrderController {
       return this.response.status(400).send(this.errorRes(400, 'Это заказ уже был создан!'))
     }
 
+    if (!_requestBody.user_id) return this.response.status(400).send(this.errorRes(400, 'Не указан идентификатор пользователя!'));
+
     //ПЛАТЁЖ
     let payment = new SvcConnector(CONFIG.payment.host, 60000, CONFIG.trace);
     let payReq = new BalanceReserve();
@@ -159,6 +161,7 @@ export class OrderController {
     let message = new Message();
     message.order_id = _requestBody.order_id;
     message.user_id = _requestBody.user_id;
+    message.date=new Date().toString();
 
     if (payRes.error) {
       //let payDel = await payment.delReq(payReq);
@@ -272,7 +275,8 @@ export class OrderController {
       type: 'string',
     },
   }) orderId: string): Promise<Order> {
-    throw new Error('Not implemented');
+    let result=await this.orderRepo.findById(orderId);
+    return result;
   }
   /**
    * deletes a single order based on the ID supplied
