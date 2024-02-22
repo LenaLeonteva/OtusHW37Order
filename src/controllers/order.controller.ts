@@ -9,6 +9,7 @@ import {Order} from '../models/order.model';
 import {OrderRepository} from '../repositories';
 import { CourierReserv } from '../models/courier-reserv.model';
 import { ProductReserv } from '../models/product-reserv.model';
+import { STATUS } from '../flow/check';
 
 /**
  * The controller class is generated from OpenAPI spec with operations tagged
@@ -135,22 +136,26 @@ export class OrderController {
       console.log("ERROR! Не указан идентификатор заказа");
       return this.response.status(400).send(this.errorRes(400, 'Не указан идентификатор заказа!'));
     }
+    const orderID=_requestBody.order_id;
     const filter = {
       where: {
-        order_id: _requestBody.order_id,
+        order_id: orderID,
       }
     };
-    const sameID = await this.orderRepo.findOne(filter)
-    if (sameID) {
+    const sameOrder = await this.orderRepo.findOne(filter)
+    if (sameOrder) {
       return this.response.status(400).send(this.errorRes(400, 'Это заказ уже был создан!'))
     }
 
     if (!_requestBody.user_id) return this.response.status(400).send(this.errorRes(400, 'Не указан идентификатор пользователя!'));
 
+    _requestBody.status=STATUS.NEW;
+    const newOrder = await this.orderRepo.create(_requestBody);
+
     //ПЛАТЁЖ
     let payment = new SvcConnector(CONFIG.payment.host, 60000, CONFIG.trace);
     let payReq = new BalanceReserve();
-    payReq.order_id = _requestBody.order_id;
+    payReq.order_id = orderID;
     payReq.user_id = _requestBody.user_id;
     payReq.price = _requestBody.price;
 
@@ -159,17 +164,20 @@ export class OrderController {
 
     let notify = new SvcConnector(CONFIG.notify.host, 60000, CONFIG.trace);
     let message = new Message();
-    message.order_id = _requestBody.order_id;
+    message.order_id = orderID;
     message.user_id = _requestBody.user_id;
     message.date=new Date().toString();
 
     if (payRes.error) {
       //let payDel = await payment.delReq(payReq);
+      await this.orderRepo.deleteById(orderID);
       console.log("Платеж не прошёл. Заказ отменён.");
       message.message = "Оплата не прошла. Недостаточно средств на счете. Заказ отменён."
       notify.postReq(message)
       return this.response.status(payRes.code ?? 500).send(payRes.message);
     }
+
+    await this.orderRepo.updateById(_requestBody.order_id, {status: STATUS.PAID});
 
     //РЕЗЕРВ ТОВАРА
     let stock = new SvcConnector(CONFIG.stock.host, 60000, CONFIG.trace);
@@ -183,6 +191,7 @@ export class OrderController {
 
     if (stockRes.error) {
       let payDel = await payment.delReq(payReq);
+      await this.orderRepo.deleteById(orderID);
       //let stockDel = await payment.delReq(stockRec);
       console.log("Delete Payment", payDel);
       message.message = "Не удалось зарезервировать товар на складе. Деньги поступят на счет в течение 15 минут. Заказ отменён."
@@ -190,6 +199,8 @@ export class OrderController {
       console.log(message.message)
       return this.response.status(stockRes.code ?? 500).send(stockRes.message);
     }
+
+    await this.orderRepo.updateById(_requestBody.order_id, {status: STATUS.STOCK});
 
     //РЕЗЕРВ КУРЬЕРА
     let courier = new SvcConnector(CONFIG.delivery.host, 60000, CONFIG.trace);
@@ -202,10 +213,11 @@ export class OrderController {
     console.log(courierRes);
 
     if (courierRes.error) {
-      let payDel = await payment.delReq(payReq);
-      console.log("Delete Payment", payDel);
       let stockDel = await stock.delReq(stockRec);
       console.log("Delete product reserve", stockDel);
+      let payDel = await payment.delReq(payReq);
+      console.log("Delete Payment", payDel);
+      await this.orderRepo.deleteById(orderID);
       //let courierDel = await payment.delReq(courierRec);
       message.message = "Невозможно доставить товар по вашему адресу. Деньги поступят на счет в течение 15 минут. Заказ отменён."
       notify.postReq(message)
@@ -213,11 +225,11 @@ export class OrderController {
       return this.response.status(courierRes.code ?? 500).send(courierRes.message);
     }
 
-    const newOrder = await this.orderRepo.create(_requestBody);
-
+    //const newOrder = await this.orderRepo.create(_requestBody);
+    await this.orderRepo.updateById(_requestBody.order_id, {status: STATUS.COMPLETE});
     message.message = "Заказ оплачен";
     notify.postReq(message);
-
+    delete newOrder.status;
     return newOrder;
   }
   /**

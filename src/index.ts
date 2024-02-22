@@ -1,4 +1,7 @@
 import {ApplicationConfig, Idempotency} from './application';
+import { OrdersDatasourceDataSource } from './datasources';
+import { checkOrders} from './flow/check';
+import { OrderRepository } from './repositories';
 
 export * from './application';
 
@@ -10,6 +13,10 @@ export async function main(options: ApplicationConfig = {}) {
   const url = app.restServer.url;
   console.log(`Server is running at ${url}`);
   console.log(`Try ${url}/ping`);
+
+  let orderRepo=await app.getRepository(OrderRepository);
+  let revice=new checkOrders(orderRepo);
+  await revice.check();
 
   return app;
 }

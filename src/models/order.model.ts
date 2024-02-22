@@ -84,6 +84,13 @@ export class Order extends Entity {
   })
   date?: string;
 
+  /**
+   *
+   */
+  @property({
+    type: 'string',
+  })
+  status?: string;
 }
 
 export interface OrderRelations {
