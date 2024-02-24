@@ -1,6 +1,6 @@
 import {inject} from '@loopback/core';
 import {repository} from '@loopback/repository';
-import {Response, RestBindings, api, operation, param, requestBody} from '@loopback/rest';
+import {Request, Response, RestBindings, api, operation, param, requestBody} from '@loopback/rest';
 import {CONFIG} from '../config';
 import {SvcConnector} from '../connectors/svc.connector';
 import {BalanceReserve} from '../models/balance-reserve.model';
@@ -10,6 +10,7 @@ import {OrderRepository} from '../repositories';
 import { CourierReserv } from '../models/courier-reserv.model';
 import { ProductReserv } from '../models/product-reserv.model';
 import { STATUS } from '../flow/check';
+import {parse} from 'cookie';
 
 /**
  * The controller class is generated from OpenAPI spec with operations tagged
@@ -90,6 +91,7 @@ export class OrderController {
   constructor(
     @repository(OrderRepository) private orderRepo: OrderRepository,
     @inject(RestBindings.Http.RESPONSE) private response: Response,
+    @inject(RestBindings.Http.REQUEST) private request: Request
   ) {
     console.log('Hello from Order Controller')
   }
@@ -136,7 +138,7 @@ export class OrderController {
       console.log("ERROR! Не указан идентификатор заказа");
       return this.response.status(400).send(this.errorRes(400, 'Не указан идентификатор заказа!'));
     }
-    const orderID=_requestBody.order_id;
+    const orderID=_requestBody.order_id; 
     const filter = {
       where: {
         order_id: orderID,
@@ -148,6 +150,17 @@ export class OrderController {
     }
 
     if (!_requestBody.user_id) return this.response.status(400).send(this.errorRes(400, 'Не указан идентификатор пользователя!'));
+
+    let cookies = this.request.get("Set-cookie");
+    if (!cookies) return this.response.status(403).send(this.errorRes(403, "Please go to login and provide Login/Password (no cookie)"));
+    let objCookies = parse(cookies[0])
+    console.log('obj with cookies:', objCookies);
+    let sessionID = objCookies.session_id;
+    if (!sessionID) return this.response.status(403).send(this.errorRes(403, "Please go to login and provide Login/Password (no cookie)"));
+
+    let xuserid = this.request.get('X-UserId');
+    if (!xuserid) return this.response.status(401).send(this.errorRes(401, "Please go to login and provide Login/Password"));
+    if (+xuserid != _requestBody.user_id) return this.response.status(403).send(this.errorRes(403, "Forbidden"));
 
     _requestBody.status=STATUS.NEW;
     const newOrder = await this.orderRepo.create(_requestBody);
