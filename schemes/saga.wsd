@@ -1,0 +1,17 @@
+title Stream processing - HTTP
+FrontEnd->API Gateway: POST Order Create
+API Gateway->Users: auth
+Users-->API Gateway: Headers
+API Gateway->Order: POST order create
+Order->Payment:POST payment request
+Payment-->Order: payment response
+Order->Stock: POST product reserve
+Stock-->Order: product response
+Order->Delivery: POST courier reserve
+Delivery-->Order: courier response ERROR
+Order->Stock: DELETE product reserve
+Stock-->Order: product response
+Order->Payment:DELETE payment
+Payment-->Order: payment response
+Order-->API Gateway:order response
+Order->Notify: message
